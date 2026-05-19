@@ -54,7 +54,7 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           NODE_ENV: production
 
-deploy:
+  deploy:
     needs: build
     runs-on: ubuntu-latest
     if: success()
