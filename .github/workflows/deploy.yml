@@ -21,11 +21,11 @@ jobs:
         run: npm install --global pnpm
 
       - name: Install dependencies
-        # This uses the config defined in pnpm-workspace.yaml
         run: pnpm install --frozen-lockfile
 
       - name: Build project
         env:
+          # This maps your GitHub Secrets to the environment for the build
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pnpm run build
@@ -36,17 +36,6 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
+          # Ensure these folders exist in your project
           source: ".next,package.json,pnpm-lock.yaml"
           target: "/var/www/impsarewe/"
-
-      - name: Finalize Server Setup
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /var/www/impsarewe/
-            mkdir -p .next/standalone/.next/static
-            cp -r .next/static/* .next/standalone/.next/static/
-            pm2 restart impsarewe || pm2 start npm --name "impsarewe" -- run start
