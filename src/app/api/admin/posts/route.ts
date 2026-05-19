@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSubmittedPosts, updatePostStatus } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/auth";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const user = await getCurrentUser();
     if (!user || user.role !== "admin") {
