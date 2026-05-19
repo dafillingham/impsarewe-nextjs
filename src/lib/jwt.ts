@@ -10,6 +10,7 @@ export interface JWTPayload {
   role: "user" | "admin";
   iat?: number;
   exp?: number;
+  [key: string]: any;
 }
 
 export async function signToken(payload: Omit<JWTPayload, "iat" | "exp">) {

@@ -12,7 +12,7 @@ export function usePosts() {
   useEffect(() => {
     async function fetchPosts() {
       try {
-        const data = await getPosts();
+        const data = (await getPosts()) as any;
         setPosts(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch posts");

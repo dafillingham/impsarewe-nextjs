@@ -12,7 +12,7 @@ export function useComments(postId: number) {
   useEffect(() => {
     async function fetchComments() {
       try {
-        const data = await getComments(postId);
+        const data = (await getComments(postId)) as any;
         setComments(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch comments");
