@@ -70,18 +70,6 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
-            # Create directory if it doesn't exist
-            mkdir -p /var/www/impsarewe
-            cd /var/www/impsarewe
-            
-            # Initialize git safely if it hasn't been set up yet
-           - name: Deploy to VPS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}
-          script: |
             mkdir -p /var/www/impsarewe
             cd /var/www/impsarewe
             
@@ -100,24 +88,10 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             
-            # FORCE install by ignoring build-script security policies
-            npx pnpm install --unsafe-perm
+            # Run install by explicitly approving the blocked dependencies
+            npx pnpm install --config.only-built-dependencies=canvas,sharp,esbuild,unrs-resolver
             
             # Build and Start
-            npx pnpm build
-            npx pm2 restart impsarewe || npx pm2 start "npx pnpm start" --name "impsarewe"
-            npx pm2 save
-            
-            # FORCE pnpm to accept the builds by writing directly to the project's local config
-            echo "only-built-dependencies[] = canvas" > .npmrc
-            echo "only-built-dependencies[] = sharp" >> .npmrc
-            echo "only-built-dependencies[] = esbuild" >> .npmrc
-            echo "only-built-dependencies[] = unrs-resolver" >> .npmrc
-            
-            # Clean install with our new project rules active
-            npx pnpm install
-            
-            # Compile and spin up
             npx pnpm build
             npx pm2 restart impsarewe || npx pm2 start "npx pnpm start" --name "impsarewe"
             npx pm2 save
