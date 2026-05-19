@@ -20,16 +20,15 @@ jobs:
       - name: Install pnpm
         run: npm install --global pnpm
 
-      - name: Install dependencies
+      - name: Install and Approve Dependencies
         run: |
           pnpm install --frozen-lockfile
-          # This ensures native modules like canvas can compile
           pnpm rebuild canvas sharp
 
       - name: Build project
-        # This injects the JWT_SECRET from your GitHub Secrets
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pnpm run build
 
       - name: Deploy to Server
@@ -41,7 +40,7 @@ jobs:
           source: ".next,package.json,pnpm-lock.yaml"
           target: "/var/www/impsarewe/"
 
-      - name: Restart Application
+      - name: Finalize Server Setup
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -49,9 +48,6 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /var/www/impsarewe/
-            # Ensure the standalone static folder exists
             mkdir -p .next/standalone/.next/static
-            # Copy the static assets to where Nginx expects them
             cp -r .next/static/* .next/standalone/.next/static/
-            # Restart your PM2 process (Replace 'impsarewe' with your app name)
             pm2 restart impsarewe || pm2 start npm --name "impsarewe" -- run start
