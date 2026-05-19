@@ -51,7 +51,7 @@ export function usePost(id: number) {
   useEffect(() => {
     async function fetchPost() {
       try {
-        const data = await getPost(id);
+        const data = (await getPost(id)) as any;
         setPost(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch post");
