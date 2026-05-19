@@ -20,10 +20,10 @@ jobs:
       - name: Install pnpm
         run: npm install --global pnpm
 
-      - name: Install and Approve Dependencies
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm rebuild canvas sharp
+      - name: Install dependencies
+        # pnpm will now automatically look at pnpm-workspace.yaml 
+        # to allow 'canvas', 'sharp', and 'esbuild' to build.
+        run: pnpm install --frozen-lockfile
 
       - name: Build project
         env:
