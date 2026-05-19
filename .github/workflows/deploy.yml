@@ -25,7 +25,6 @@ jobs:
 
       - name: Build project
         env:
-          # These secrets are injected into the build environment
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pnpm run build
