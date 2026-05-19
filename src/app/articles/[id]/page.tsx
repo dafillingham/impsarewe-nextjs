@@ -6,16 +6,30 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createComment } from "@/lib/api";
 
-export default function ArticlePage({ params }: { params: { id: string } }) {
-  const postId = parseInt(params.id);
-  const { post, isLoading, error } = usePost(postId);
-  const { comments, isLoading: commentsLoading } = useComments(postId);
+export default function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
+  const [postId, setPostId] = useState<number | null>(null);
+  const { post, isLoading, error } = usePost(postId || 0);
+  const { comments, isLoading: commentsLoading } = useComments(postId || 0);
   const { user, isAuthenticated } = useAuth();
   const [commentContent, setCommentContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    params.then(({ id }) => {
+      setPostId(parseInt(id));
+    });
+  }, [params]);
+
+  if (postId === null) {
+    return (
+      <div className="container py-8">
+        <p className="text-muted-foreground">Loading article...</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
