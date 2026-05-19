@@ -25,6 +25,7 @@ jobs:
 
       - name: Build project
         env:
+          # THIS IS THE PART THAT FIXES YOUR ERROR
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pnpm run build
