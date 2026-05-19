@@ -70,24 +70,32 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
-            # If the directory doesn't exist or doesn't have Git setup, create it and initialize
-            if [ ! -d "/var/www/impsarewe/.git" ]; then
-              mkdir -p /var/www/impsarewe
-              cd /var/www/impsarewe
-              git init
-              git remote add origin https://github.com/dafillingham/impsarewe.git
+            # Create directory if it doesn't exist
+            mkdir -p /var/www/impsarewe
+            cd /var/www/impsarewe
+            
+            # Initialize git safely if it hasn't been set up yet
+            if [ ! -d ".git" ]; then
+              git init -b main
+              git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/dafillingham/impsarewe.git
+            else
+              # Always keep the token fresh in case it expired
+              git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/dafillingham/impsarewe.git
             fi
             
-            # Navigate to the folder and pull using the built-in Actions authorization
-            cd /var/www/impsarewe
-            git fetch --all
+            # Fetch and overwrite code cleanly
+            git fetch origin main
             git reset --hard origin/main
             
-            # Build and launch the app
-            pnpm install
-            pnpm build
-            pm2 restart impsarewe || pm2 start "pnpm start" --name "impsarewe"
-            pm2 save
+            # Source standard user profiles to load Node paths if present
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # Run tools using npx to ensure the server finds them instantly
+            npx pnpm install
+            npx pnpm build
+            npx pm2 restart impsarewe || npx pm2 start "npx pnpm start" --name "impsarewe"
+            npx pm2 save
 
   notify:
     needs: deploy
