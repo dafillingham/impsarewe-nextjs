@@ -26,11 +26,11 @@ export function useComments(postId: number) {
 
   const createComment = async (userId: number, content: string) => {
     try {
-      const newComment = await apiCreateComment({
+      const newComment = (await apiCreateComment({
         postId,
         userId,
         content,
-      });
+      })) as any;
       setComments([...comments, newComment]);
       return newComment;
     } catch (err) {
