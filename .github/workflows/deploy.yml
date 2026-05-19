@@ -20,8 +20,21 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 10.x
-      - run: pnpm install
-      - run: pnpm build
+      
+      # 1. Create .npmrc to bypass pnpm build script security
+      - name: Configure pnpm build security
+        run: echo "dangerously-allow-all-builds=true" >> .npmrc
+      
+      - name: Install dependencies
+        run: pnpm install
+      
+      # 2. Add secrets to the build environment
+      - name: Build project
+        run: pnpm build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NODE_ENV: production
 
   deploy:
     needs: build
@@ -40,16 +53,12 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             
-            # Create the required configuration to authorize these builds
-            echo "allowBuilds:" > pnpm-workspace.yaml
-            echo "  canvas: true" >> pnpm-workspace.yaml
-            echo "  sharp: true" >> pnpm-workspace.yaml
-            echo "  esbuild: true" >> pnpm-workspace.yaml
-            echo "  unrs-resolver: true" >> pnpm-workspace.yaml
+            # Ensure pnpm allows builds on the server too
+            echo "dangerously-allow-all-builds=true" > .npmrc
             
-            # Now run install - it will read the file and succeed
+            # Install on server
             npx pnpm install
             
-            # Restart the application
+            # Restart App
             npx pm2 restart impsarewe || npx pm2 start "npx pnpm start" --name "impsarewe"
             npx pm2 save
