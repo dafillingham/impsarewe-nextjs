@@ -25,7 +25,7 @@ jobs:
 
       - name: Build project
         env:
-          # This maps your GitHub Secrets to the environment for the build
+          # These secrets are injected into the build environment
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pnpm run build
@@ -36,6 +36,5 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          # Ensure these folders exist in your project
           source: ".next,package.json,pnpm-lock.yaml"
           target: "/var/www/impsarewe/"
