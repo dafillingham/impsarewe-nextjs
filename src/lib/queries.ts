@@ -6,7 +6,7 @@ import {
   verificationCodes,
   users,
 } from "@/drizzle/schema";
-import { eq, desc, and, gte, lte } from "drizzle-orm";
+import { eq, desc, and, gte } from "drizzle-orm";
 
 // ============================================================================
 // Posts Queries
