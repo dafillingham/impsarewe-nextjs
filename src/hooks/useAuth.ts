@@ -12,8 +12,8 @@ export function useAuth() {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const response = await getCurrentUser();
-        setUser(response.user || null);
+        const response = (await getCurrentUser()) as any;
+        setUser(response?.user || null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch user");
       } finally {
