@@ -6,9 +6,6 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,20 +18,21 @@ jobs:
         with:
           version: 10.x
       
-      # 1. Create .npmrc to bypass pnpm build script security
-      - name: Configure pnpm build security
-        run: echo "dangerously-allow-all-builds=true" >> .npmrc
+      # 1. Authorize the build scripts
+      - name: Authorize build dependencies
+        run: |
+          echo "allowBuilds:" > pnpm-workspace.yaml
+          echo "  canvas: true" >> pnpm-workspace.yaml
+          echo "  sharp: true" >> pnpm-workspace.yaml
+          echo "  esbuild: true" >> pnpm-workspace.yaml
+          echo "  unrs-resolver: true" >> pnpm-workspace.yaml
       
+      # 2. Run install (now that builds are allowed)
       - name: Install dependencies
         run: pnpm install
-      
-      # 2. Add secrets to the build environment
+        
       - name: Build project
         run: pnpm build
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          NODE_ENV: production
 
   deploy:
     needs: build
@@ -49,16 +47,16 @@ jobs:
           script: |
             mkdir -p /var/www/impsarewe
             cd /var/www/impsarewe
-            
             git fetch origin main
             git reset --hard origin/main
             
-            # Ensure pnpm allows builds on the server too
-            echo "dangerously-allow-all-builds=true" > .npmrc
+            # Authorize builds on the server side as well
+            echo "allowBuilds:" > pnpm-workspace.yaml
+            echo "  canvas: true" >> pnpm-workspace.yaml
+            echo "  sharp: true" >> pnpm-workspace.yaml
+            echo "  esbuild: true" >> pnpm-workspace.yaml
+            echo "  unrs-resolver: true" >> pnpm-workspace.yaml
             
-            # Install on server
             npx pnpm install
-            
-            # Restart App
             npx pm2 restart impsarewe || npx pm2 start "npx pnpm start" --name "impsarewe"
             npx pm2 save
