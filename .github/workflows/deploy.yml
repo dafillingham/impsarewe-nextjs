@@ -91,9 +91,14 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             
-            # Run tools using an environment flag to force-approve building dependency packages
-            export PNPM_FLAGS="--allow-build=canvas,sharp,esbuild,unrs-resolver"
-            npx pnpm install $PNPM_FLAGS
+            # FORCE pnpm to accept the builds by writing directly to the project's local config
+            echo "only-built-dependencies[] = canvas" > .npmrc
+            echo "only-built-dependencies[] = sharp" >> .npmrc
+            echo "only-built-dependencies[] = esbuild" >> .npmrc
+            echo "only-built-dependencies[] = unrs-resolver" >> .npmrc
+            
+            # Clean install with our new project rules active
+            npx pnpm install
             
             # Compile and spin up
             npx pnpm build
