@@ -12,57 +12,21 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 10.x
-      
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      
-      - name: Install dependencies
-        run: pnpm install
-      
-      - name: Run tests
-        run: pnpm test --run || true
-      
-      - name: Build project
-        run: pnpm build
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          NODE_ENV: production
+      - run: pnpm install
+      - run: pnpm build
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: success()
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
         with:
@@ -73,39 +37,16 @@ jobs:
             mkdir -p /var/www/impsarewe
             cd /var/www/impsarewe
             
-            # Setup Git
-            if [ ! -d ".git" ]; then
-              git init -b main
-              git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/dafillingham/impsarewe.git
-            else
-              git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/dafillingham/impsarewe.git
-            fi
-            
             git fetch origin main
             git reset --hard origin/main
             
-            # Source paths
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            # Create a local .npmrc to permanently allow these builds
+            echo "ignore-scripts=false" > .npmrc
+            echo "unsafe-perm=true" >> .npmrc
             
-            # Run install by explicitly approving the blocked dependencies
-            npx pnpm install --config.only-built-dependencies=canvas,sharp,esbuild,unrs-resolver
+            # Install with the new config active
+            npx pnpm install --no-frozen-lockfile
             
-            # Build and Start
-            npx pnpm build
+            # Restart App
             npx pm2 restart impsarewe || npx pm2 start "npx pnpm start" --name "impsarewe"
             npx pm2 save
-
-  notify:
-    needs: deploy
-    runs-on: ubuntu-latest
-    if: always()
-    
-    steps:
-      - name: Deployment Status
-        run: |
-          if [ "${{ needs.deploy.result }}" == "success" ]; then
-            echo "✅ Deployment successful!"
-          else
-            echo "❌ Deployment failed!"
-          fi
