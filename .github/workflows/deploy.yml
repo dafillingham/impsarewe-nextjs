@@ -18,7 +18,7 @@ jobs:
         with:
           version: 10.x
       
-      # 1. Authorize the build scripts
+      # 1. Authorize the build scripts by creating pnpm-workspace.yaml
       - name: Authorize build dependencies
         run: |
           echo "allowBuilds:" > pnpm-workspace.yaml
