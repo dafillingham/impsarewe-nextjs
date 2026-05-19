@@ -25,9 +25,9 @@ jobs:
 
       - name: Build project
         env:
-          # THIS IS THE PART THAT FIXES YOUR ERROR
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          # These must be mapped here so 'next build' can read them
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: pnpm run build
 
       - name: Deploy to Server
