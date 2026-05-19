@@ -93,5 +93,7 @@
     "tailwindcss": "^4.1.14",
     "typescript": "5.9.3",
     "vitest": "^2.1.4"
-  }
-}
+  },
+  "pnpm": {
+    "allowBuilds": {
+      "canvas": true,
