@@ -20,9 +20,12 @@ jobs:
       - name: Install pnpm
         run: npm install --global pnpm
 
-      - name: Install dependencies
-        # The --unsafe-perm flag allows canvas/sharp to build correctly
-        run: pnpm install --frozen-lockfile --unsafe-perm
+      - name: Install and Approve Dependencies
+        # This fixes the [ERR_PNPM_IGNORED_BUILDS] error
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm approve-builds --global
+          pnpm rebuild canvas sharp
 
       - name: Build project
         run: pnpm run build
@@ -36,7 +39,7 @@ jobs:
           source: ".next,package.json,pnpm-lock.yaml"
           target: "/var/www/impsarewe/"
 
-      - name: Restart Application
+      - name: Finalize Server Setup
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -44,9 +47,6 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /var/www/impsarewe/
-            # Ensure the standalone static folder exists
             mkdir -p .next/standalone/.next/static
-            # Copy the static assets to where Nginx expects them
             cp -r .next/static/* .next/standalone/.next/static/
-            # Restart your PM2 process (replace 'your-app-name' with your actual PM2 name)
-            pm2 restart your-app-name || pm2 start npm --name "your-app-name" -- run start
+            pm2 restart all || echo "PM2 process not found"
