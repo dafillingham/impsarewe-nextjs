@@ -97,3 +97,8 @@
   "pnpm": {
     "allowBuilds": {
       "canvas": true,
+      "sharp": true,
+      "esbuild": true
+    }
+  }
+}
