@@ -5,9 +5,6 @@ import {
   commentUsers,
   verificationCodes,
   users,
-  fixtures,
-  results,
-  lineups,
 } from "@/drizzle/schema";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
 
