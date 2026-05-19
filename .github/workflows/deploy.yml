@@ -65,12 +65,10 @@ jobs:
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
-        env:
-          RAW_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key: ${{ env.RAW_SSH_KEY }}
+          password: ${{ secrets.VPS_PASSWORD }}  # 👈 This replaces the messy key line!
           script: |
             cd /var/www/impsarewe
             git pull origin main
