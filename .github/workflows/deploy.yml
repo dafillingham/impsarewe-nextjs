@@ -75,21 +75,38 @@ jobs:
             cd /var/www/impsarewe
             
             # Initialize git safely if it hasn't been set up yet
+           - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            mkdir -p /var/www/impsarewe
+            cd /var/www/impsarewe
+            
+            # Setup Git
             if [ ! -d ".git" ]; then
               git init -b main
               git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/dafillingham/impsarewe.git
             else
-              # Always keep the token fresh in case it expired
               git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/dafillingham/impsarewe.git
             fi
             
-            # Fetch and overwrite code cleanly
             git fetch origin main
             git reset --hard origin/main
             
-            # Source standard user profiles to load Node paths if present
+            # Source paths
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # FORCE install by ignoring build-script security policies
+            npx pnpm install --unsafe-perm
+            
+            # Build and Start
+            npx pnpm build
+            npx pm2 restart impsarewe || npx pm2 start "npx pnpm start" --name "impsarewe"
+            npx pm2 save
             
             # FORCE pnpm to accept the builds by writing directly to the project's local config
             echo "only-built-dependencies[] = canvas" > .npmrc
