@@ -20,14 +20,16 @@ jobs:
       - name: Install pnpm
         run: npm install --global pnpm
 
-      - name: Install and Approve Dependencies
-        # This fixes the [ERR_PNPM_IGNORED_BUILDS] error
+      - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
-          pnpm approve-builds --global
+          # This ensures native modules like canvas can compile
           pnpm rebuild canvas sharp
 
       - name: Build project
+        # This injects the JWT_SECRET from your GitHub Secrets
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: pnpm run build
 
       - name: Deploy to Server
@@ -39,7 +41,7 @@ jobs:
           source: ".next,package.json,pnpm-lock.yaml"
           target: "/var/www/impsarewe/"
 
-      - name: Finalize Server Setup
+      - name: Restart Application
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -47,6 +49,9 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /var/www/impsarewe/
+            # Ensure the standalone static folder exists
             mkdir -p .next/standalone/.next/static
+            # Copy the static assets to where Nginx expects them
             cp -r .next/static/* .next/standalone/.next/static/
-            pm2 restart all || echo "PM2 process not found"
+            # Restart your PM2 process (Replace 'impsarewe' with your app name)
+            pm2 restart impsarewe || pm2 start npm --name "impsarewe" -- run start
