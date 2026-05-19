@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,7 +21,7 @@ jobs:
         with:
           version: 10.x
       
-      # 1. Authorize the build scripts by creating pnpm-workspace.yaml
+      # 1. Authorize the build scripts
       - name: Authorize build dependencies
         run: |
           echo "allowBuilds:" > pnpm-workspace.yaml
@@ -27,12 +30,17 @@ jobs:
           echo "  esbuild: true" >> pnpm-workspace.yaml
           echo "  unrs-resolver: true" >> pnpm-workspace.yaml
       
-      # 2. Run install (now that builds are allowed)
+      # 2. Install
       - name: Install dependencies
         run: pnpm install
         
+      # 3. Build with Secrets
       - name: Build project
         run: pnpm build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NODE_ENV: production
 
   deploy:
     needs: build
@@ -50,7 +58,7 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             
-            # Authorize builds on the server side as well
+            # Authorize builds on the server side
             echo "allowBuilds:" > pnpm-workspace.yaml
             echo "  canvas: true" >> pnpm-workspace.yaml
             echo "  sharp: true" >> pnpm-workspace.yaml
