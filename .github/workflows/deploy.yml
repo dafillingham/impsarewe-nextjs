@@ -21,12 +21,12 @@ jobs:
         run: npm install --global pnpm
 
       - name: Install dependencies
-        # pnpm will now automatically look at pnpm-workspace.yaml 
-        # to allow 'canvas', 'sharp', and 'esbuild' to build.
-        run: pnpm install --frozen-lockfile
+        # This explicitly allows the packages that were blocking your build
+        run: pnpm install --frozen-lockfile --config.onlyBuiltDependencies=canvas,sharp,esbuild,unrs-resolver
 
       - name: Build project
         env:
+          # You MUST have these secrets defined in your GitHub Repo Settings > Secrets
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pnpm run build
