@@ -26,7 +26,7 @@ export function usePosts() {
 
   const createPost = async (data: Partial<Post>) => {
     try {
-      const newPost = await apiCreatePost(data);
+      const newPost = (await apiCreatePost(data)) as any;
       setPosts([...posts, newPost]);
       return newPost;
     } catch (err) {
