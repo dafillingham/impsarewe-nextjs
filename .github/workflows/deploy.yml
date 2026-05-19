@@ -91,8 +91,11 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             
-            # Run tools using npx and auto-approve required builds for canvas/sharp
-            npx pnpm install --only-built-dependencies
+            # Run tools using an environment flag to force-approve building dependency packages
+            export PNPM_FLAGS="--allow-build=canvas,sharp,esbuild,unrs-resolver"
+            npx pnpm install $PNPM_FLAGS
+            
+            # Compile and spin up
             npx pnpm build
             npx pm2 restart impsarewe || npx pm2 start "npx pnpm start" --name "impsarewe"
             npx pm2 save
