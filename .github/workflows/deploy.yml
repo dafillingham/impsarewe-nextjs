@@ -63,12 +63,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Prepare SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" | base64 -d > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key_base64: ${{ secrets.VPS_SSH_KEY }}
+          key_path: ~/.ssh/id_ed25519
           script: |
             cd /var/www/impsarewe
             git pull origin main
@@ -76,6 +82,7 @@ jobs:
             pnpm build
             pm2 restart impsarewe || pm2 start "pnpm start" --name "impsarewe"
             pm2 save
+
   notify:
     needs: deploy
     runs-on: ubuntu-latest
