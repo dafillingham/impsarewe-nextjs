@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPublishedPosts, createPost } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/auth";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const posts = await getPublishedPosts();
     return NextResponse.json(posts);
