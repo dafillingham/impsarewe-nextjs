@@ -40,13 +40,16 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             
-            # Create a local .npmrc to permanently allow these builds
-            echo "ignore-scripts=false" > .npmrc
-            echo "unsafe-perm=true" >> .npmrc
+            # Create the required configuration to authorize these builds
+            echo "allowBuilds:" > pnpm-workspace.yaml
+            echo "  canvas: true" >> pnpm-workspace.yaml
+            echo "  sharp: true" >> pnpm-workspace.yaml
+            echo "  esbuild: true" >> pnpm-workspace.yaml
+            echo "  unrs-resolver: true" >> pnpm-workspace.yaml
             
-            # Install with the new config active
-            npx pnpm install --no-frozen-lockfile
+            # Now run install - it will read the file and succeed
+            npx pnpm install
             
-            # Restart App
+            # Restart the application
             npx pm2 restart impsarewe || npx pm2 start "npx pnpm start" --name "impsarewe"
             npx pm2 save
