@@ -68,10 +68,22 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}  # 👈 This replaces the messy key line!
+          password: ${{ secrets.VPS_PASSWORD }}
           script: |
+            # If the directory doesn't exist or doesn't have Git setup, create it and initialize
+            if [ ! -d "/var/www/impsarewe/.git" ]; then
+              mkdir -p /var/www/impsarewe
+              cd /var/www/impsarewe
+              git init
+              git remote add origin https://github.com/dafillingham/impsarewe.git
+            fi
+            
+            # Navigate to the folder and pull using the built-in Actions authorization
             cd /var/www/impsarewe
-            git pull origin main
+            git fetch --all
+            git reset --hard origin/main
+            
+            # Build and launch the app
             pnpm install
             pnpm build
             pm2 restart impsarewe || pm2 start "pnpm start" --name "impsarewe"
