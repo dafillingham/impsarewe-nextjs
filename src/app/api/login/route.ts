@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     // Create JWT token
     const token = await signToken({
       userId: user.id,
-      email: user.email,
+      email: user.email ?? "",
       role: user.role as "user" | "admin",
     });
 
