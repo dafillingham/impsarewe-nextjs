@@ -25,13 +25,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Debug Environment
+      - name: Create .env file
         run: |
-          echo "JWT_SECRET is set: ${{ secrets.JWT_SECRET != '' }}"
-          echo "DATABASE_URL is set: ${{ secrets.DATABASE_URL != '' }}"
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "DATABASE_URL=mysql://dummy:dummy@localhost:3306/dummy" >> .env
 
       - name: Build Application
         run: pnpm build
-        env:
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
