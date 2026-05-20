@@ -28,9 +28,5 @@ jobs:
       - name: Build Application
         run: pnpm build
         env:
-          # These map your GitHub Secrets to the build environment
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      # Note: Ensure you have your deployment steps (like SCP or SSH) 
-      # following this build step to move the files to your server.
