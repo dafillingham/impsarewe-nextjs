@@ -23,7 +23,8 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        run: pnpm install
+        # This forces pnpm to install in the root, ignoring potential workspace settings
+        run: pnpm install --no-frozen-lockfile --workspace-root
 
       - name: Build project
         run: pnpm build
