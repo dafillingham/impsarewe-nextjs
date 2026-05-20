@@ -15,13 +15,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          # We removed pnpm setup to avoid the 'packages field missing' error
 
       - name: Install dependencies
         run: npm install
 
+      - name: Set Environment Variables
+        run: |
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+          echo "DATABASE_URL=mysql://dummy:dummy@localhost:3306/dummy" >> $GITHUB_ENV
+
       - name: Build Application
         run: npm run build
-        env:
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          DATABASE_URL: mysql://dummy:dummy@localhost:3306/dummy
