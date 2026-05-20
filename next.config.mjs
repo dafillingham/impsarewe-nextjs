@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // Change this from 'standalone' to 'export'
-  reactStrictMode: true,
-  images: {
-    unoptimized: true, // Required for static exports
-  },
+  output: 'standalone', // Essential for VPS
+  images: { unoptimized: true },
 };
-
 export default nextConfig;
