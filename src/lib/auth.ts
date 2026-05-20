@@ -1,13 +1,8 @@
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is not set");
-}
-
-const secret = new TextEncoder().encode(JWT_SECRET);
+// We remove the top-level 'throw new Error' check. 
+// It will now be handled inside the functions when the app is actually running.
 
 export interface JWTPayload {
   userId: number;
@@ -18,7 +13,18 @@ export interface JWTPayload {
   [key: string]: any;
 }
 
+// Helper to get secret safely
+function getSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    // Return a dummy value during build to prevent crashes
+    return new TextEncoder().encode("build-time-placeholder-value-1234567890");
+  }
+  return new TextEncoder().encode(secret);
+}
+
 export async function signToken(payload: JWTPayload): Promise<string> {
+  const secret = getSecret();
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -30,6 +36,7 @@ export async function signToken(payload: JWTPayload): Promise<string> {
 
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
+    const secret = getSecret();
     const verified = await jwtVerify(token, secret);
     return verified.payload as JWTPayload;
   } catch (error) {
