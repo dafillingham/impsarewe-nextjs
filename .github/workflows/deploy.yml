@@ -25,6 +25,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Debug Environment
+        run: |
+          echo "JWT_SECRET is set: ${{ secrets.JWT_SECRET != '' }}"
+          echo "DATABASE_URL is set: ${{ secrets.DATABASE_URL != '' }}"
+
       - name: Build Application
         run: pnpm build
         env:
