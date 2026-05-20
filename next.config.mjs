@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone', // <--- THIS IS CRITICAL FOR IONOS
   reactStrictMode: true,
+  images: {
+    unoptimized: true, // <--- Helps with your public/images folder
+  },
   typescript: {
     ignoreBuildErrors: false,
   },
