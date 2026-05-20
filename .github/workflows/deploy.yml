@@ -1,36 +1,52 @@
-name: Build and Deploy
+name: "Deploy Now: Build and Deploy"
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+
+env:
+  DEPLOYMENT_FOLDER: .next/standalone
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: v22.x
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Application
-        run: |
-          rm -rf .next
-          npm run build
+      - name: Build Next.js App
         env:
-          JWT_SECRET: "build-time-placeholder"
-          DATABASE_URL: "mysql://dummy:dummy@localhost:3306/dummy"
-
-      - name: Ensure public directory exists
-        run: mkdir -p public
+          CI: true
+          # Add your required env vars here if not using GitHub Secrets
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          npm install --global pnpm
+          pnpm install
+          rm -rf .next
+          pnpm build
+          
+          # Prepare the standalone package for Ionos
+          mkdir -p .next/standalone/.next/static
+          mkdir -p .next/standalone/public
+          cp -r .next/static/* .next/standalone/.next/static/
+          cp -r public/* .next/standalone/public/
 
       - name: Deploy to Ionos
         uses: ionos-deploy-now/artifact-action@v1
         with:
-          path: .
+          api-key: ${{ secrets.IONOS_API_KEY }}
+          service-host: api-eu.ionos.space
+          project-id: a0e14c30-722a-440a-a431-9929ba78cf3b
+          branch-id: main
+          version: ${{ github.sha }}
+          folder: ${{ env.DEPLOYMENT_FOLDER }}
+          action: upload
