@@ -13,11 +13,9 @@ jobs:
           node-version: '22'
       - run: npm install -g pnpm && pnpm install
       - run: pnpm build
-      # THIS STEP IS THE FIX: It tells IONOS the build is done and ready to go live
-      - name: Deploy
+      # The App integration handles deployment automatically 
+      # without needing an API key in the YAML.
+      - name: Deploy to IONOS
         uses: ionos-deploy-now/artifact-action@v1
         with:
-          service-host: api-eu.ionos.space
-          project-id: a0e14c30-722a-440a-a431-9929ba78cf3b
-          branch-id: main
           folder: out
