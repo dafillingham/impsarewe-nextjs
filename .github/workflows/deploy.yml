@@ -13,9 +13,3 @@ jobs:
           node-version: '22'
       - run: npm install -g pnpm && pnpm install
       - run: pnpm build
-      # The App integration handles deployment automatically 
-      # without needing an API key in the YAML.
-      - name: Deploy to IONOS
-        uses: ionos-deploy-now/artifact-action@v1
-        with:
-          folder: out
