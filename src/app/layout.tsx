@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import "@/styles/globals.css";
+
+// Use a relative path to ensure the build process finds the file regardless of alias settings
+import "../styles/globals.css"; 
 
 export const metadata: Metadata = {
   title: process.env.VITE_APP_TITLE || "Imps Are We",
