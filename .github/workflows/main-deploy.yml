@@ -5,9 +5,6 @@ on:
     branches:
       - main
 
-env:
-  DEPLOYMENT_FOLDER: .next/standalone
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -24,16 +21,8 @@ jobs:
         run: |
           npm install -g pnpm
           pnpm install
-          # Clean old build
           rm -rf .next
-          # Build project
           pnpm build
-          
-          # Prepare the standalone directory for Ionos
-          mkdir -p .next/standalone/.next/static
-          mkdir -p .next/standalone/public
-          cp -r .next/static/* .next/standalone/.next/static/
-          cp -r public/* .next/standalone/public/
 
       - name: Deploy
         uses: ionos-deploy-now/artifact-action@v1
@@ -42,6 +31,7 @@ jobs:
           service-host: api-eu.ionos.space
           project-id: a0e14c30-722a-440a-a431-9929ba78cf3b
           branch-id: main
-          folder: ${{ env.DEPLOYMENT_FOLDER }}
+          # We point directly to the output directory
+          folder: .next/standalone
           version: ${{ github.sha }}
           action: upload
