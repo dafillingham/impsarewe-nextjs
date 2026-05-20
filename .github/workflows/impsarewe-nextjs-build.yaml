@@ -4,6 +4,16 @@ on:
   push:
     branches: [ main ]
   workflow_call:
+    # Explicitly define the inputs being passed from your orchestration file
+    inputs:
+      site-url:
+        description: 'The URL of the site'
+        required: true
+        type: string
+      branch-id:
+        description: 'The ID of the branch'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -23,8 +33,8 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        # This forces pnpm to install in the root, ignoring potential workspace settings
-        run: pnpm install --no-frozen-lockfile --workspace-root
+        # Now clean and without the workspace-root flag
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build project
         run: pnpm build
