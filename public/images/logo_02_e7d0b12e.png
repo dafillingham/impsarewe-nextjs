@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error><Code>NoSuchBucket</Code><Message>The specified bucket does not exist</Message><BucketName>manus-storage</BucketName><RequestId>8M3J45BKACD5HSCB</RequestId><HostId>KkYmZz6HZPRAPjlGFjfbf8sjYyzLkL3yO3gDsZXFXcqTNzG6B091H+gVng8yeu/ruXUTA4ATnt4weWbaxyzvwhy0irSK/Cvc</HostId></Error>
