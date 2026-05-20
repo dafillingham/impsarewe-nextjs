@@ -3,7 +3,6 @@ name: Build Workflow
 on:
   push:
     branches: [ main ]
-  # This line allows other workflows to call this one
   workflow_call:
 
 jobs:
@@ -17,6 +16,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies
         run: pnpm install
