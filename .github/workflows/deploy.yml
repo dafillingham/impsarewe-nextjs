@@ -22,8 +22,17 @@ jobs:
       - name: Build Application
         run: npm run build
         env:
-          # We force these here so the build compiler sees them
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          # This tells Next.js to ignore type errors that might be causing the crash
-          NEXT_DISABLE_TYPECHECKS: true
+          # These placeholders allow the build to pass successfully
+          JWT_SECRET: "build-time-placeholder"
+          DATABASE_URL: "mysql://dummy:dummy@localhost:3306/dummy"
+
+      # This creates the 'public' folder if it is missing
+      - name: Ensure public directory exists
+        run: mkdir -p public
+
+      - name: Deploy to Ionos
+        uses: ionos-deploy-now/artifact-action@v1
+        with:
+          # This points to the root of your project
+          # The action will pick up the .next folder and public folder
+          path: .
